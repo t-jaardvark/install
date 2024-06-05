@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Default values
+input_dir=$(pwd)
+output_file="$(pwd)/ls-md5.csv"
+
+# Parse command-line options
+while getopts "i:o:" opt; do
+  case ${opt} in
+    i )
+      input_dir=$OPTARG
+      ;;
+    o )
+      output_file=$OPTARG
+      ;;
+    \? )
+      echo "Usage: cmd [-i input_directory] [-o output_file]"
+      exit 1
+      ;;
+  esac
+done
+
+# Function to calculate md5 hashes and write to CSV
+generate_file_md5() {
+  local dir=$1
+  local output=$2
+
+  # Write CSV header
+  echo "md5,filename" > "$output"
+
+  # Find all files and calculate MD5 hashes
+  find "$dir" -type f | while read -r file; do
+    md5=$(md5sum "$file" | awk '{ print $1 }')
+    echo "\"$md5\",\"$file\"" >> "$output"
+  done
+}
+
+# Call the function with the specified or default parameters
+generate_file_md5 "$input_dir" "$output_file"
